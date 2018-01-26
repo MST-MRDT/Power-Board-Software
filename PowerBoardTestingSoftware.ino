@@ -30,7 +30,7 @@ const uint16_t M4_CURRENT_READING           = 1107;
 const uint16_t M5_CURRENT_READING           = 1108;
 const uint16_t M6_CURRENT_READING           = 1109;
 const uint16_t M7_CURRENT_READING           = 1110;
-const uint16_t EXTRA_12V_CURRENT_READING    = 1114; 
+const uint16_t ARM_12V_CURRENT_READING      = 1114; 
 const uint16_t ACT_12V_CURRENT_READING      = 1115; 
 const uint16_t LOGIC_12V_CURRENT_READING    = 1116; 
 const uint16_t COM_12V_CURRENT_READING      = 1117;
@@ -48,7 +48,7 @@ const uint8_t BUS_M4_ON_OFF                 = 3;
 const uint8_t BUS_M5_ON_OFF                 = 4;
 const uint8_t BUS_M6_ON_OFF                 = 5;
 const uint8_t BUS_M7_ON_OFF                 = 6;
-const uint8_t BUS_12V_EXTRA_ON_OFF          = 7;
+const uint8_t BUS_12V_ARM_ON_OFF            = 7;
 const uint8_t BUS_12V_ACT_ON_OFF            = 8;
 const uint8_t BUS_12V_LOGIC_ON_OFF          = 9;
 const uint8_t BUS_12V_COM_ON_OFF            = 10;
@@ -91,34 +91,34 @@ const int ROVECOMM_DELAY = 10;
 
 //0 MIN VOLT    3.036 MAX_VOLT  RESISTOR DIVIDER = 11;      
 //const int BATTERYPACK_CNTRL  = 11;
-const int EXTRA_CNTRL         = 17;   
-const int ACT_CNTRL           = 13;
-const int LOGIC_CNTRL         = 18; //created new
-const int COM_CNTRL           = 34; //created new
-const int COM_LOGIC_CNTRL     = 11; //created new
-const int M1_CNTRL            = 58;
-const int M2_CNTRL            = 57;
-const int M3_CNTRL            = 74;
-const int M4_CNTRL            = 53;
-const int M5_CNTRL            = 73;
-const int M6_CNTRL            = 72;
-const int M7_CNTRL            = 71;
-const int FAN_CNTRL           = 42;
+const int ACT_CNTRL           = PN_2;
+const int LOGIC_CNTRL         = PB_5; //created new
+const int COM_CNTRL           = PP_0; //created new
+const int COM_LOGIC_CNTRL     = PN_5; //created new
+const int ARM_CNTRL           = PD_6
+const int M1_CNTRL            = PL_6;
+const int M2_CNTRL            = PL_5;
+const int M3_CNTRL            = PL_4;
+const int M4_CNTRL            = PL_3;
+const int M5_CNTRL            = PL_2;
+const int M6_CNTRL            = PL_1;
+const int M7_CNTRL            = PL_0;
+const int FAN_CNTRL           = PD_2;
 
 
 // Sensor Volts/Amps Readings Pins
-const int EXTRA_AMPS          = 26;
-const int ACT_AMPS            = 25;
-const int LOGIC_AMPS          = 24;
-const int COM_AMPS            = 23;
-const int M1_AMPS             = 68;
-const int M2_AMPS             = 67;
-const int M3_AMPS             = 66; 
-const int M4_AMPS             = 45;
-const int M5_AMPS             = 65;
-const int M6_AMPS             = 64;
-const int M7_AMPS             = 63;
-const int PACK_VOLTAGE        = 6;
+const int ACT_AMPS            = PN_0;
+const int LOGIC_AMPS          = PB_4;
+const int COM_AMPS            = PP_1;
+const int ARM_AMPS            = PD_7;
+const int M1_AMPS             = PM_7;
+const int M2_AMPS             = PM_6;
+const int M3_AMPS             = PM_5; 
+const int M4_AMPS             = PM_4;
+const int M5_AMPS             = PM_3;
+const int M6_AMPS             = PM_2;
+const int M7_AMPS             = PM_1;
+const int PACK_VOLTAGE        = PE_5;
 
 //////////////////////////////////////////////RoveBoard
 // Tiva1294C RoveBoard Specs
@@ -147,7 +147,8 @@ const int DEBOUNCE_DELAY = 10;
 
 //Safest Test pin
 const int ESTOP_12V_COM_LOGIC_MAX_AMPS_THRESHOLD = 5;
-const int ESTOP_12V_EXTRA_ACT_MAX_AMPS_THRESHOLD = 15;   
+const int ESTOP_12V_ACT_MAX_AMPS_THRESHOLD = 15;  
+const int ESTOP_12V_ARM_MAX_AMPS_THRESHOLD = 40; 
 const int ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD = 22;
 
 // Checks the pin for bouncing voltages to avoid false positives
@@ -199,11 +200,11 @@ float scale(float x, float in_min, float in_max, float out_min, float out_max)
 void setup() 
 {
   // Control Pins are outputs
-  pinMode(EXTRA_CNTRL, OUTPUT);
   pinMode(ACT_CNTRL, OUTPUT);
   pinMode(COM_LOGIC_CNTRL, OUTPUT);
   pinMode(COM_CNTRL, OUTPUT);
   pinMode(LOGIC_CNTRL, OUTPUT);
+  pinMode(ARM_CNTRL, OUTPUT);
   pinMode(M1_CNTRL, OUTPUT);
   pinMode(M2_CNTRL, OUTPUT);
   pinMode(M3_CNTRL, OUTPUT); 
@@ -213,10 +214,10 @@ void setup()
   pinMode(M7_CNTRL, OUTPUT);
   pinMode(FAN_CNTRL, OUTPUT);
 
-  pinMode(EXTRA_AMPS, INPUT);
   pinMode(ACT_AMPS, INPUT);
   pinMode(COM_AMPS, INPUT);
   pinMode(LOGIC_AMPS, INPUT);
+  pinMode(ARM_AMPS, INPUT);
   pinMode(M1_AMPS, INPUT);
   pinMode(M2_AMPS, INPUT);
   pinMode(M3_AMPS, INPUT);
@@ -226,11 +227,11 @@ void setup()
   pinMode(M7_AMPS, INPUT);
   pinMode(PACK_VOLTAGE, INPUT);
   
-  digitalWrite(EXTRA_CNTRL, LOW);
   digitalWrite(ACT_CNTRL, LOW);
   digitalWrite(COM_LOGIC_CNTRL, LOW);
   digitalWrite(COM_CNTRL, LOW);
   digitalWrite(LOGIC_CNTRL, LOW);
+  digitalWrite(ARM_CNTRL, LOW);
   digitalWrite(M1_CNTRL, LOW);
   digitalWrite(M2_CNTRL, LOW);
   digitalWrite(M3_CNTRL, LOW);
@@ -243,11 +244,11 @@ void setup()
   // Turn on everything when we begin
   delay(ROVER_POWER_RESET_DELAY);
   
-  digitalWrite(EXTRA_CNTRL, HIGH);
   digitalWrite(ACT_CNTRL, HIGH);
   digitalWrite(COM_LOGIC_CNTRL, HIGH);
   digitalWrite(COM_CNTRL, HIGH);
   digitalWrite(LOGIC_CNTRL, HIGH);
+  digitalWrite(ARM_CNTRL, HIGH);
   digitalWrite(M1_CNTRL, HIGH);
   digitalWrite(M2_CNTRL, HIGH);
   digitalWrite(M3_CNTRL, HIGH);
@@ -268,14 +269,7 @@ void setup()
 /////////////////////////////////////////////Powerboard Loop Forever
 void loop() 
 { 
-  if( singleDebounce(EXTRA_AMPS, ESTOP_12V_EXTRA_ACT_MAX_AMPS_THRESHOLD) ) //checks current reading and if too high, sends error msg to base
-  {                                                                        //station then turns off the bus.      
-    (POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_EXTRA_ON_OFF), &BUS_12V_EXTRA_ON_OFF);
-    digitalWrite(EXTRA_CNTRL, LOW);
-    delay(ROVECOMM_DELAY);
-  }//end if
-  
-  if( singleDebounce(ACT_AMPS, ESTOP_12V_EXTRA_ACT_MAX_AMPS_THRESHOLD) )
+  if( singleDebounce(ACT_AMPS, ESTOP_12V_ACT_MAX_AMPS_THRESHOLD) )
   {
     (POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_ACT_ON_OFF), &BUS_12V_ACT_ON_OFF);
     digitalWrite(ACT_CNTRL, LOW);
@@ -305,6 +299,13 @@ void loop()
         digitalWrite(COM_CNTRL,HIGH);
         com_over_current = 0;
       }
+  }//end if
+  
+  if( singleDebounce(ARM_AMPS, ESTOP_12V_ARM_MAX_AMPS_THRESHOLD) )
+  {
+    (POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_ARM_ON_OFF), &BUS_12V_ARM_ON_OFF);
+	digitalWrite(ARM_CNTRL, LOW);
+	delay(ROVECOMM_DELAY);
   }//end if
 
   if( singleDebounce(M1_AMPS, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) ) 
@@ -368,10 +369,6 @@ void loop()
     case POWER_BUS_ENABLE: //data_id is 1088
       switch (data_value)
       { 
-        case BUS_12V_EXTRA_ON_OFF:
-          digitalWrite(EXTRA_CNTRL, HIGH);
-          break;
-
         case BUS_12V_ACT_ON_OFF:
           digitalWrite(ACT_CNTRL, HIGH);
           break;
@@ -387,6 +384,10 @@ void loop()
         case BUS_12V_COM_ON_OFF:
           digitalWrite(COM_CNTRL, HIGH);
           break;
+		
+		case BUS_12V_ARM_ON_OFF:
+		  digitalWrite(ARM_CNTRL, HIGH);
+		  break;
           
         case BUS_M1_ON_OFF:
           digitalWrite(M1_CNTRL, HIGH);
@@ -430,12 +431,10 @@ void loop()
     case POWER_BUS_DISABLE: //data_id id 1089
           switch (data_value)
           { 
-            case BUS_12V_EXTRA_ON_OFF:
-              digitalWrite(EXTRA_CNTRL, LOW);
-              break;
             case BUS_12V_ACT_ON_OFF:
               digitalWrite(ACT_CNTRL, LOW);
               break;
+			  
             case BUS_12V_COM_LOGIC_ON_OFF:
               digitalWrite(COM_LOGIC_CNTRL, LOW);
               break;
@@ -447,6 +446,10 @@ void loop()
             case BUS_12V_COM_ON_OFF:
               digitalWrite(COM_CNTRL, LOW);
               break;
+			  
+			case BUS_12V_ARM_ON_OFF:
+			  digitalWrite(ARM_CNTRL, LOW);
+			  break;
               
             case BUS_M1_ON_OFF:
               digitalWrite(M1_CNTRL, LOW);
@@ -498,20 +501,20 @@ void loop()
       digitalWrite(M7_CNTRL, LOW);  
                   
       digitalWrite(ACT_CNTRL, LOW);
-      digitalWrite(EXTRA_CNTRL, LOW);
       digitalWrite(LOGIC_CNTRL, LOW);
       digitalWrite(COM_CNTRL, LOW);
       digitalWrite(COM_LOGIC_CNTRL, LOW);
+	  digitalWrite(ARM_CNTRL, LOW);
       
       digitalWrite(FAN_CNTRL, LOW);
      
       delay(ROVER_POWER_RESET_DELAY);
 
-      digitalWrite(EXTRA_CNTRL, HIGH);
       digitalWrite(ACT_CNTRL, HIGH);
       digitalWrite(COM_LOGIC_CNTRL, HIGH);
       digitalWrite(COM_CNTRL, HIGH);
       digitalWrite(LOGIC_CNTRL, HIGH);
+	  digitalWrite(ARM_CNTRL, HIGH);
     
       digitalWrite(M1_CNTRL, HIGH);
       digitalWrite(M2_CNTRL, HIGH);
@@ -562,11 +565,6 @@ void loop()
       //Serial.println(data_id);
       break;
   }//endswitch
-
-  adc_reading = analogRead(EXTRA_AMPS);
-  current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
-  roveComm_SendMsg(EXTRA_12V_CURRENT_READING, sizeof(current_reading), &current_reading);
-  delay(ROVECOMM_DELAY);
   
   adc_reading = analogRead(ACT_AMPS);
   current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
@@ -581,6 +579,11 @@ void loop()
   adc_reading = analogRead(COM_AMPS);
   current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
   roveComm_SendMsg(COM_12V_CURRENT_READING, sizeof(current_reading), &current_reading);
+  delay(ROVECOMM_DELAY);
+  
+  adc_reading = analogRead(ARM_AMPS);
+  current_reading = mapFloats(adc_reading, ADC_MIN, ADC_MAX, CURRENT_MIN, CURRENT_MAX);
+  roveComm_SendMsg(ARM_12V_CURRENT_READING, sizeof(current_reading), &current_reading);
   delay(ROVECOMM_DELAY);
   
   adc_reading = analogRead(M1_AMPS); 
