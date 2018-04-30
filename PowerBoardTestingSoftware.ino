@@ -23,7 +23,7 @@
 //RED can toggle the bus by bool
 const uint16_t NO_ROVECOMM_MESSAGE          = 0;
 
-const uint16_t M1_CURRENT_READING           = 1104;
+const uint16_t M1_CURRENT_READING           = 1104; //These data IDs can be found on ROVESODRIVE called Rovecomm DataID Allocations
 const uint16_t M2_CURRENT_READING           = 1105;
 const uint16_t M3_CURRENT_READING           = 1106;
 const uint16_t M4_CURRENT_READING           = 1107;
@@ -53,7 +53,7 @@ const uint8_t BUS_12V_ACT_ON_OFF            = 8;
 const uint8_t BUS_12V_LOGIC_ON_OFF          = 9;
 const uint8_t BUS_12V_COM_ON_OFF            = 10;
 const uint8_t BUS_12V_COM_LOGIC_ON_OFF      = 11;
-const uint8_t FAN_ON_OFF                    = 12; //power board fan
+const uint8_t FANS_ON_OFF                    = 12; //power board fans
 
 const uint16_t BMS_PACK_CURRENT             = 1072;
 const uint16_t BMS_PACK_OVER_CURRENT        = 1076;  //notification sent if pack overcurrents and shuts down
@@ -89,35 +89,34 @@ const int ROVECOMM_DELAY = 10;
 //////////////////////////////////////////////Pinmap
 // Control Pins
 
-//0 MIN VOLT    3.036 MAX_VOLT  RESISTOR DIVIDER = 11;      
-//const int BATTERYPACK_CNTRL  = 11;
-const int ACT_CNTRL           = PN_2;
-const int LOGIC_CNTRL         = PB_5; //created new
-const int COM_CNTRL           = PP_0; //created new
-const int COM_LOGIC_CNTRL     = PN_5; //created new
-const int ARM_CNTRL           = PD_6;
-const int M1_CNTRL            = PL_6;
-const int M2_CNTRL            = PL_5;
-const int M3_CNTRL            = PL_4;
-const int M4_CNTRL            = PL_3;
-const int M5_CNTRL            = PL_2;
-const int M6_CNTRL            = PL_1;
-const int M7_CNTRL            = PL_0;
-const int FAN_CNTRL           = PD_2;
+//0 MIN VOLT    3.036 MAX_VOLT  RESISTOR DIVIDER = 11;
+const int ACT_CNTRL           = PN_3;
+const int LOGIC_CNTRL         = PH_2;
+const int COM_CNTRL           = PD_1;
+const int COM_LOGIC_CNTRL     = PP_2;
+const int ARM_CNTRL           = PK_5;
+const int M1_CNTRL            = PK_7;
+const int M2_CNTRL            = PK_6;
+const int M3_CNTRL            = PH_1;
+const int M4_CNTRL            = PH_0;
+const int M5_CNTRL            = PM_2;
+const int M6_CNTRL            = PM_1;
+const int M7_CNTRL            = PM_0;
+const int FAN_CNTRL           = PM_3;
 
 
 // Sensor Volts/Amps Readings Pins
-const int ACT_AMPS            = PN_0;
-const int LOGIC_AMPS          = PB_4;
-const int COM_AMPS            = PP_1;
-const int ARM_AMPS            = PD_7;
-const int M1_AMPS             = PM_7;
-const int M2_AMPS             = PM_6;
-const int M3_AMPS             = PM_5; 
-const int M4_AMPS             = PM_4;
-const int M5_AMPS             = PM_3;
-const int M6_AMPS             = PM_2;
-const int M7_AMPS             = PM_1;
+const int ACT_AMPS            = PE_2;
+const int LOGIC_AMPS          = PE_0;
+const int COM_AMPS            = PE_1;
+const int ARM_AMPS            = PD_0;
+const int M1_AMPS             = PK_3;
+const int M2_AMPS             = PK_2;
+const int M3_AMPS             = PK_1; 
+const int M4_AMPS             = PK_0;
+const int M5_AMPS             = PB_5;
+const int M6_AMPS             = PB_4;
+const int M7_AMPS             = PE_3;
 const int PACK_VOLTAGE        = PE_5;
 
 //////////////////////////////////////////////RoveBoard
@@ -146,10 +145,10 @@ float voltage_reading            = 0;
 const int DEBOUNCE_DELAY = 10;
 
 //Safest Test pin
-const int ESTOP_12V_COM_LOGIC_MAX_AMPS_THRESHOLD = 5;
-const int ESTOP_12V_ACT_MAX_AMPS_THRESHOLD = 15;  
-const int ESTOP_12V_ARM_MAX_AMPS_THRESHOLD = 40; 
-const int ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD = 22;
+const int ESTOP_12V_COM_LOGIC_MAX_AMPS_THRESHOLD = 15; //5
+const int ESTOP_12V_ACT_MAX_AMPS_THRESHOLD = 15; //15  
+const int ESTOP_12V_40A_GENERAL_MAX_AMPS_THRESHOLD = 15; //20  (480W/30V)
+const int ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD = 15; //22
 
 // Checks the pin for bouncing voltages to avoid false positives
 bool singleDebounce(int bouncing_pin, int max_amps_threshold)
@@ -186,7 +185,7 @@ int num_loops = 0; //used to track number of times the main loop has completed a
 ///////////////////////////////////////////////Implementation
 float mapFloats(float x, float in_min, float in_max, float out_min, float out_max)
 {
-  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
+  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min + 1; //+1 added for offset
 }//end fnctn
 
 ///scales the input value x from analog input range (0 to 3.3) to actual values (Pack voltage or current)
@@ -261,7 +260,7 @@ void setup()
   
   roveComm_Begin(192, 168, 1, 132);
   Serial7.begin(115200); //corresponds to pair of Rx and Tx pins on the Tiva that pb uses to communicate with bms.
-  Serial.begin(9600);
+  Serial.begin(9600); //15000 is the baud rate that the integrated tiva chip needs to be set at so the serial monitor reads accurately at 9600.
   Serial.println("Setting Up...");
   delay(500);
 }//end setup
@@ -293,11 +292,13 @@ void loop()
     delay(ROVECOMM_DELAY);
   }//end if
   
-  if( singleDebounce(ARM_AMPS, ESTOP_12V_ARM_MAX_AMPS_THRESHOLD) )
+  if( singleDebounce(ARM_AMPS, ESTOP_12V_40A_GENERAL_MAX_AMPS_THRESHOLD) )
   {
+    //roveComm_SendMsg(POWER_BUS_OVER_CURRENT, sizeof(BUS_12V_COM_ON_OFF), &BUS_12V_COM_ON_OFF);
+    //be sure to get a new id for the 40A General bus
     Serial.println("Arm Bus Over-current");
-	digitalWrite(LOGIC_CNTRL, LOW);
-	delay(ROVECOMM_DELAY);
+	  digitalWrite(ARM_CNTRL, LOW);
+	  delay(ROVECOMM_DELAY);
   }//end if
   
   if( singleDebounce(M1_AMPS, ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD) ) 
@@ -439,7 +440,7 @@ void loop()
               Serial.println("enable M7");
               break;
 
-            case 'd':///FAN_ON_OFF:
+            case 'd':///FANS_ON_OFF:
               digitalWrite(FAN_CNTRL, HIGH);
               Serial.println("enable fan");
               break;
@@ -515,7 +516,7 @@ void loop()
               digitalWrite(M7_CNTRL, LOW);
               break;
 
-            case 'd':///FAN_ON_OFF:
+            case 'd':///FANS_ON_OFF:
               digitalWrite(FAN_CNTRL, LOW);
               Serial.println("Disabling Fan");
               break;
@@ -527,7 +528,7 @@ void loop()
          }//endswitch 
          break;
          
-        case '4':///ROVER_POWER_RESET: //data_id is 1041
+        case '4':///ROVER_POWER_RESET: //data_id is 1041, but will not necessarily use this case because resetting rover goes through to BMS.
           
           Serial.println("Resetting all power busses...");
           digitalWrite(M1_CNTRL, LOW);
@@ -550,6 +551,7 @@ void loop()
           digitalWrite(COM_LOGIC_CNTRL, HIGH);
           digitalWrite(COM_CNTRL, HIGH);
           digitalWrite(LOGIC_CNTRL, HIGH);
+          digitalWrite(ARM_CNTRL, HIGH);
         
           digitalWrite(M1_CNTRL, HIGH);
           digitalWrite(M2_CNTRL, HIGH);
@@ -625,6 +627,7 @@ void loop()
               Serial.print("M2 Current Reading: ");
               Serial.println(current_reading);
               delay(ROVECOMM_DELAY);
+              break;
               
             case '8':
               adc_reading = analogRead(M3_AMPS);
@@ -926,7 +929,7 @@ void loop()
           digitalWrite(M7_CNTRL, HIGH);
           break;
 
-        case FAN_ON_OFF:
+        case FANS_ON_OFF:
           digitalWrite(FAN_CNTRL, HIGH);
           break;
           
@@ -988,7 +991,7 @@ void loop()
               digitalWrite(M7_CNTRL, LOW);
               break;
 
-            case FAN_ON_OFF:
+            case FANS_ON_OFF:
               digitalWrite(FAN_CNTRL, LOW);
               break;
               
