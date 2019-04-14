@@ -70,7 +70,7 @@ RoveCommEthernetUdp RoveComm;
 //Safest Test pin
 #define ESTOP_12V_COM_LOGIC_MAX_AMPS_THRESHOLD  2000 //5
 #define ESTOP_12V_ACT_MAX_AMPS_THRESHOLD        2000 //15  
-#define ESTOP_AUX_MAX_AMPS_THRESHOLD            17000 //17  (360W/21.6V) = 16.6 A
+#define ESTOP_AUX_MAX_AMPS_THRESHOLD            19000 //17  (360W/21.6V) = 16.6 A
 #define ESTOP_MOTOR_BUS_MAX_AMPS_THRESHOLD      22000 //22
 
 //Tuning Variables
